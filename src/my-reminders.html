@@ -20,13 +20,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
 <link rel="import" href="/src/my-reminder-card.html">
+<link rel="import" href="shared-styles.html">
 
 
 <dom-module id="my-reminders">
 
 	<template>
 
-		<style>
+		<style include="shared-styles">
 			:host {
 				display:block;
 			}
@@ -91,11 +92,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			properties: {
 				newTitle: {
 					type: 'string',
-					value: ' '
+					value: ''
 				},
 				newDescription: {
 					type: 'string',
-					value: ' '
+					value: ''
 				},
 				dueDate: {
 					type: 'object',
