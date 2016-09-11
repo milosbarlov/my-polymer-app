@@ -13,14 +13,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
-<link rel="import" href="shared-styles.html">
 <link rel="import" href="/src/my-reminder-card.html">
 
 
@@ -28,7 +26,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 	<template>
 
-		<style include="shared-styles">
+		<style>
 			:host {
 				display:block;
 			}
@@ -61,6 +59,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			<paper-fab icon="icons:add" on-tap="createReminder"></paper-fab>
 		</paper-card>
 
+
 		<paper-dialog id="dateDialog" class="paper-date-picker-dialog" modal on-iron-overlay-closed="dismissDialog">
 			<paper-date-picker date="{{dueDate}}"></paper-date-picker>
 			<div class="buttons">
@@ -68,6 +67,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<paper-button dialog-confirm>OK</paper-button>
 			</div>
 		</paper-dialog>
+
 
 		<div class="content">
 			<template is="dom-repeat" items="[[reminders]]">
@@ -107,23 +107,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 			},
 
+
 			ready: function() {
 				this.reminders = this.loadFromLocaleStorage();
 
 				var self = this;
 				document.addEventListener('my-reminder.remove', function(e) {
 					self.remove( e.detail.id );
-
 				})
 			},
+
+
+			// Open dialog with date picker
 			openDateDialog: function() {
 				this.$.dateDialog.open();
-				// BUG: fixed date picker bug
+				// HACK: fixed paper-dialog bug
+				// https://github.com/PolymerElements/polymer-starter-kit/issues/154
 				document.querySelector('body').appendChild(this.$.dateDialog);
 			},
+
+
+			// Format the date as DD/MM/YYYY
 			dateFormat: function(inp) {
 				return ''+inp.getDate() + '/' + inp.getMonth() + '/' + inp.getFullYear();
 			},
+
+
+			// Create reminder, add to list and save on storage
 			createReminder: function() {
 				var item = {
 						id: this.generateId(),
@@ -134,26 +144,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					};
 
 				this.reminders.push(item);
-				// BUG: force  reminders  to update view
+				// HACK: force  reminders  to update view
 				this.reminders = this.reminders.splice(0);
 
 				this.saveToLocaleStorage( item );
 
 				this.reset();
 			},
+
+
+			// Reset all entry fields
 			reset: function() {
-				this.newTitle = ' ';
-				this.newDescription = ' ';
+				this.newTitle = '';
+				this.newDescription = '';
 				this.dueDate = new Date();
 			},
+
+
+			// Generate string of 10 characters
 			generateId: function() {
-				return 'REMINDER_' + (Math.random().toString(35).slice(2, 11)).toUpperCase();
+				return 'REMINDER_' + (Math.random().toString(35).slice(2, 12)).toUpperCase();
 			},
+
+
+			// Save item to storage
 			saveToLocaleStorage: function(item) {
 				try {
 					window.localStorage.setItem( item.id, JSON.stringify( item ) );
 				} catch(e) {}
 			},
+
+
+			// Load all items from storage
 			loadFromLocaleStorage: function() {
 				var keys = [],
 					data = [];
@@ -177,6 +199,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 			},
 
+
+			// Remove item
 			remove: function(id) {
 				var reminder = this.findReminderById( id ),
 					index = this.reminders.indexOf( reminder );
@@ -186,8 +210,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					delete window.localStorage[id];
 				} catch(e) {}
 
+				// HACK: force  reminders  to update view
 				this.reminders = this.reminders.splice(0);
 			},
+
+
 			findReminderById: function(id) {
 				for(var i = 0; i < this.reminders.length; i++) {
 					if (this.reminders[i].id === id) { return this.reminders[i]; }
