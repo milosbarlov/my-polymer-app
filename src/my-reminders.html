@@ -27,47 +27,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="my-reminders">
 
 	<template>
+
 		<style include="shared-styles">
 			:host {
 				display:block;
 			}
-
 			#entrySection {
 				margin:0;
 				width:100%;
 			}
-			.content {text-align:center}
-
-			paper-checkbox {
-				float:right;
-				margin:2vh 2vw;
+			.content {
+				text-align:center;
 			}
-
-			paper-button {}
-
 			paper-fab {
 				float:right;
 				bottom:25px;
 				right:2vw;
 				background:#4DD0E1;
 			}
-
 			paper-input {
 				margin:0 2vw;
 			}
 		</style>
+
+
 		<paper-card id="entrySection" elevation="2" heading="Reminders">
-			<paper-input label="Title"></paper-input>
-			<paper-input label="Description"></paper-input>
-			<paper-item>Due date: {{ dateFormat(dd) }}
+			<paper-input label="Title" value="{{newTitle}}"></paper-input>
+			<paper-input label="Description" value="{{newDescription}}"></paper-input>
+			<paper-item>Due date: {{ dateFormat(dueDate) }}
 				<paper-icon-button icon="date-range" on-tap="openDateDialog"></paper-icon-button>
 			</paper-item>
 
-			<paper-fab icon="icons:add" on-tap="add"></paper-fab>
+			<paper-fab icon="icons:add" on-tap="createReminder"></paper-fab>
 		</paper-card>
 
 		<paper-dialog id="dateDialog" class="paper-date-picker-dialog" modal on-iron-overlay-closed="dismissDialog">
-			<paper-date-picker date="{{dd}}"></paper-date-picker>
+			<paper-date-picker date="{{dueDate}}"></paper-date-picker>
 			<div class="buttons">
 				<paper-button dialog-dismiss>Cancel</paper-button>
 				<paper-button dialog-confirm>OK</paper-button>
@@ -75,7 +70,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		</paper-dialog>
 
 		<div class="content">
-			<template is="dom-repeat" items="{{emp}}">
+			<template is="dom-repeat" items="[[reminders]]">
 				<my-reminder-card
 						title="{{item.title}}"
 						description="{{item.description}}"
@@ -86,34 +81,60 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 	</template>
 
+
+
 	<script>
 
 		Polymer({
 			is: 'my-reminders',
 			properties: {
-				dd: {
+				newTitle: {
+					type: 'string',
+					value: ' '
+				},
+				newDescription: {
+					type: 'string',
+					value: ' '
+				},
+				dueDate: {
 					type: 'object',
 					value: new Date()
 				},
-				emp:{
-					type:Array,
+				reminders: {
+					type: 'array',
 					value: []
 				}
 			},
 
 			openDateDialog: function() {
 				this.$.dateDialog.open();
-				// fixed date picker bug
+				// BUG: fixed date picker bug
 				document.querySelector('body').appendChild(this.$.dateDialog);
 			},
 			dateFormat: function(inp) {
 				return ''+inp.getDate() + '/' + inp.getMonth() + '/' + inp.getFullYear();
 			},
-			add: function() {
-				this.emp = [
-					{title: 'Bob', description: 'Smith'},
-					{title: 'Sally', description: 'Johnson'}
-				];
+			createReminder: function() {
+				var item = {
+						id: this.generateId(),
+						title: this.newTitle,
+						description: this.newDescription,
+						date: this.dateFormat( this.dueDate )
+					};
+
+				this.reminders.push(item);
+				// BUG: force  reminders  to update view
+				this.reminders = this.reminders.splice(0);
+
+				this.reset();
+			},
+			reset: function() {
+				this.newTitle = ' ';
+				this.newDescription = ' ';
+				this.dueDate = new Date();
+			},
+			generateId: function() {
+				return 'REMINDER_' + (Math.random().toString(35).slice(2, 11)).toUpperCase();
 			}
 		});
 	</script>
