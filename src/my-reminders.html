@@ -21,11 +21,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="/src/my-reminder-card.html">
 
 
 <dom-module id="my-reminders">
 
-	<template class="content">
+	<template>
 		<style include="shared-styles">
 			:host {
 				display:block;
@@ -35,45 +36,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				margin:0;
 				width:100%;
 			}
+			.content {text-align:center}
 
 			paper-checkbox {
 				float:right;
 				margin:2vh 2vw;
 			}
 
-			paper-button {
-				background:#CCC;
-			}
+			paper-button {}
 
 			paper-fab {
-				position:absolute;
-				bottom:3vh;
-				right:3vw;
+				float:right;
+				bottom:25px;
+				right:2vw;
 				background:#4DD0E1;
-			}
-
-			.done {
-				background:green;
-			}
-
-			.info {
-				font-style:italic;
-				font-size:14px;
-				color:#696969;
-				padding-top:0;
-				padding-bottom:0;
-			}
-
-			paper-material {
-				background-color:#FFF;
-				max-width:640px;
-				width:90%;
-				margin:25px auto;
-				position:relative;
-			}
-
-			.info span {
-				margin-left:5px;
 			}
 
 			paper-input {
@@ -87,7 +63,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<paper-icon-button icon="date-range" on-tap="openDateDialog"></paper-icon-button>
 			</paper-item>
 
-			<paper-fab icon="icons:add"></paper-fab>
+			<paper-fab icon="icons:add" on-tap="add"></paper-fab>
 		</paper-card>
 
 		<paper-dialog id="dateDialog" class="paper-date-picker-dialog" modal on-iron-overlay-closed="dismissDialog">
@@ -98,15 +74,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			</div>
 		</paper-dialog>
 
-		<paper-material class="todo" elevation="1">
-			<paper-checkbox checked="{{completed}}"></paper-checkbox>
-			<paper-fab hidden={{editing}} icon="icons:create" on-tap="doEdit" class="edit" mini></paper-fab>
-			<paper-fab hidden={{!editing}} icon="icons:done" on-tap="doEdit" class="done" mini></paper-fab>
-			<paper-item hidden="{{editing}}" id="task">{{task}}</paper-item>
-			<paper-input id="edit" hidden="{{!editing}}" value="{{task}}"></paper-input>
-			<paper-item class="info">Created by: <span>{{ user }}</span></paper-item>
-			<paper-item class="info">{{ time }}</paper-item>
-		</paper-material> <!-- data bindings in local DOM -->
+		<div class="content">
+			<template is="dom-repeat" items="{{emp}}">
+				<my-reminder-card
+						title="{{item.title}}"
+						description="{{item.description}}"
+						date="{{item.date}}">
+				</my-reminder-card>
+			</template>
+		</div>
 
 	</template>
 
@@ -114,7 +90,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 		Polymer({
 			is: 'my-reminders',
-			dd: new Date(),
+			properties: {
+				dd: {
+					type: 'object',
+					value: new Date()
+				},
+				emp:{
+					type:Array,
+					value: []
+				}
+			},
+
 			openDateDialog: function() {
 				this.$.dateDialog.open();
 				// fixed date picker bug
@@ -122,6 +108,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			},
 			dateFormat: function(inp) {
 				return ''+inp.getDate() + '/' + inp.getMonth() + '/' + inp.getFullYear();
+			},
+			add: function() {
+				this.emp = [
+					{title: 'Bob', description: 'Smith'},
+					{title: 'Sally', description: 'Johnson'}
+				];
 			}
 		});
 	</script>
