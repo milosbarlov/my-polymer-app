@@ -74,7 +74,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<my-reminder-card
 						title="{{item.title}}"
 						description="{{item.description}}"
-						date="{{item.dateFormatted}}">
+						date="{{item.dateFormatted}}"
+						id="{{item.id}}">
 				</my-reminder-card>
 			</template>
 		</div>
@@ -108,7 +109,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			ready: function() {
 				this.reminders = this.loadFromLocaleStorage();
-				console.log(this.reminders);
+
+				var self = this;
+				document.addEventListener('my-reminder.remove', function(e) {
+					self.remove( e.detail.id );
+
+				})
 			},
 			openDateDialog: function() {
 				this.$.dateDialog.open();
@@ -149,19 +155,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				} catch(e) {}
 			},
 			loadFromLocaleStorage: function() {
-				var keys = Object.keys(window.localStorage).filter( onlyReminders ),
+				var keys = [],
 					data = [];
 
-				keys.forEach(function(k) {
-					try {
-						data.push( JSON.parse( window.localStorage.getItem(k) ) );
-					} catch(e) {}
-				});
+				try {
+					keys = Object.keys(window.localStorage);
+				} catch(e) {}
+
+				keys.filter( onlyReminders ).forEach( getItem );
 
 				return data;
 
 				function onlyReminders(k) {
 					return k.indexOf('REMINDER_') === 0;
+				}
+
+				function getItem(k) {
+					try {
+						data.push( JSON.parse( window.localStorage.getItem(k) ) );
+					} catch(e) {}
+				}
+			},
+
+			remove: function(id) {
+				var reminder = this.findReminderById( id ),
+					index = this.reminders.indexOf( reminder );
+
+				this.reminders.splice(index, 1);
+				try {
+					delete window.localStorage[id];
+				} catch(e) {}
+
+				this.reminders = this.reminders.splice(0);
+			},
+			findReminderById: function(id) {
+				for(var i = 0; i < this.reminders.length; i++) {
+					if (this.reminders[i].id === id) { return this.reminders[i]; }
 				}
 			}
 		});

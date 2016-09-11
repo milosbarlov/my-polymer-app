@@ -20,7 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
 
-<dom-module id="my-reminder-card" attributes="title description date">
+<dom-module id="my-reminder-card" attributes="title description date id">
 
 	<style>
 		paper-card,
@@ -51,6 +51,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				{{description}}
 				<p>Due date: {{date}}</p>
 			</div>
+			<paper-icon-button icon="clear" title="clear" on-tap="remove"></paper-icon-button>
 		</paper-card>
 
 	</template>
@@ -60,6 +61,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 	Polymer({
-		is: 'my-reminder-card'
+		is: 'my-reminder-card',
+		remove:function() {
+			this.fire('my-reminder.remove', {id: this.id});
+		}
 	});
 </script>
