@@ -74,7 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<my-reminder-card
 						title="{{item.title}}"
 						description="{{item.description}}"
-						date="{{item.date}}">
+						date="{{item.dateFormatted}}">
 				</my-reminder-card>
 			</template>
 		</div>
@@ -106,6 +106,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 			},
 
+			ready: function() {
+				this.reminders = this.loadFromLocaleStorage();
+				console.log(this.reminders);
+			},
 			openDateDialog: function() {
 				this.$.dateDialog.open();
 				// BUG: fixed date picker bug
@@ -119,12 +123,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						id: this.generateId(),
 						title: this.newTitle,
 						description: this.newDescription,
-						date: this.dateFormat( this.dueDate )
+						dateFormatted: this.dateFormat( this.dueDate ),
+						date: this.dueDate
 					};
 
 				this.reminders.push(item);
 				// BUG: force  reminders  to update view
 				this.reminders = this.reminders.splice(0);
+
+				this.saveToLocaleStorage( item );
 
 				this.reset();
 			},
@@ -135,6 +142,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			},
 			generateId: function() {
 				return 'REMINDER_' + (Math.random().toString(35).slice(2, 11)).toUpperCase();
+			},
+			saveToLocaleStorage: function(item) {
+				try {
+					window.localStorage.setItem( item.id, JSON.stringify( item ) );
+				} catch(e) {}
+			},
+			loadFromLocaleStorage: function() {
+				var keys = Object.keys(window.localStorage).filter( onlyReminders ),
+					data = [];
+
+				keys.forEach(function(k) {
+					try {
+						data.push( JSON.parse( window.localStorage.getItem(k) ) );
+					} catch(e) {}
+				});
+
+				return data;
+
+				function onlyReminders(k) {
+					return k.indexOf('REMINDER_') === 0;
+				}
 			}
 		});
 	</script>
